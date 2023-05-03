@@ -15,9 +15,10 @@ contract UnstoppableVault is IERC3156FlashLender, ReentrancyGuard, Owned, ERC462
     using SafeTransferLib for ERC20;
     using FixedPointMathLib for uint256;
 
-    uint256 public constant FEE_FACTOR = 0.05 ether;
-    uint64 public constant GRACE_PERIOD = 30 days;
+    uint256 public constant FEE_FACTOR = 0.05 ether; // ? Why ether?
+    uint64 public constant GRACE_PERIOD = 30 days; // ? Why days?
 
+    // @notes Identifies end of the 30 day grace period
     uint64 public immutable end = uint64(block.timestamp) + GRACE_PERIOD;
 
     address public feeRecipient;
@@ -40,6 +41,7 @@ contract UnstoppableVault is IERC3156FlashLender, ReentrancyGuard, Owned, ERC462
     /**
      * @inheritdoc IERC3156FlashLender
      */
+    // @notes Returns the total amount of underlying ERC20 assets held unless a token other than the ERC20 token is passed as an argument, in which case returns 0.
     function maxFlashLoan(address _token) public view returns (uint256) {
         if (address(asset) != _token)
             return 0;
@@ -50,6 +52,7 @@ contract UnstoppableVault is IERC3156FlashLender, ReentrancyGuard, Owned, ERC462
     /**
      * @inheritdoc IERC3156FlashLender
      */
+    // @notes Used to calculate the relevant flash fee at the time of calling.
     function flashFee(address _token, uint256 _amount) public view returns (uint256 fee) {
         if (address(asset) != _token)
             revert UnsupportedCurrency();
@@ -57,7 +60,7 @@ contract UnstoppableVault is IERC3156FlashLender, ReentrancyGuard, Owned, ERC462
         if (block.timestamp < end && _amount < maxFlashLoan(_token)) {
             return 0;
         } else {
-            return _amount.mulWadUp(FEE_FACTOR);
+            return _amount.mulWadUp(FEE_FACTOR); // mulWadUp = _amount * FEE_FACTOR / 1e18 rounded up
         }
     }
 
@@ -71,6 +74,7 @@ contract UnstoppableVault is IERC3156FlashLender, ReentrancyGuard, Owned, ERC462
     /**
      * @inheritdoc ERC4626
      */
+    // @notes Modifies the standard totalAssets() method to add an inline assembly check, testing whether storage[0] == 2... in which case it reverts.
     function totalAssets() public view override returns (uint256) {
         assembly { // better safe than sorry
             if eq(sload(0), 2) {
@@ -109,10 +113,12 @@ contract UnstoppableVault is IERC3156FlashLender, ReentrancyGuard, Owned, ERC462
     /**
      * @inheritdoc ERC4626
      */
+    // @notes amended for reentrancy guard
     function beforeWithdraw(uint256 assets, uint256 shares) internal override nonReentrant {}
 
     /**
      * @inheritdoc ERC4626
      */
+    // @notes amended for reentrancy guard
     function afterDeposit(uint256 assets, uint256 shares) internal override nonReentrant {}
 }

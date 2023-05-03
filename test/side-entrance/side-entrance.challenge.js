@@ -26,6 +26,7 @@ describe('[Challenge] Side entrance', function () {
 
     it('Execution', async function () {
         /** CODE YOUR SOLUTION HERE */
+        // @notes We want a single transaction which incorporates a flashLoan() call for the balance of the pool (thereby giving msg.value == SideEntranceLenderPool.balance), a deposit() call for any balance (which sets balances[player] == msg.value, so balances[player] == SideEntranceLenderPool.balance), and finally a withdraw() call (thereby withdrawing balances[player]), before the flashLoan is repaid.
     });
 
     after(async function () {
